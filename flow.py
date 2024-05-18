@@ -12,13 +12,18 @@ def validate_input(input: str):
 def send_to_db(userData: UserModel):
     print(userData)
 
+@task
+def send_to_fail_db(userJsonData: str, exception):
+    print('User raw json data: ', userJsonData)
+    print('Exception: ', exception)
+
 
 @flow(log_prints=True)
 def user_pipeline(userJsonData: str = "{}"):
     try:
         userData = validate_input(userJsonData)
-    except:
-        print('DEAD')
+    except Exception as e:
+        send_to_fail_db(userJsonData, e)
     else:
         send_to_db(userData)
 
