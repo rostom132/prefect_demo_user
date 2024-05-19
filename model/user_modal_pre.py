@@ -9,7 +9,10 @@ from utils.repairer_before import (
     auto_correct_mail
 )
 
+from prefect import task
+
 class UserModelPre(BaseUserModel):
+    @task
     @field_validator('gender', mode='before')
     @classmethod
     def validate_gender(cls, value):
@@ -18,6 +21,7 @@ class UserModelPre(BaseUserModel):
             return value
         return auto_correct_gender(value)
     
+    @task
     @field_validator('email', mode='before')
     @classmethod
     def validate_email(cls, value):
