@@ -15,8 +15,8 @@ def validate_input(input: str):
             userData = UserModelPre(**userJson)
             list_correct_data.append(userData)
         except Exception as e:
-            print('FAILED to parse: ', userData, e)
-            userData = UserRaw(**userData)
+            print('FAILED to parse: ', userJson, e)
+            userData = UserRaw(**userJson)
             list_failed_data.append(userData)
     return list_correct_data, list_failed_data
 
