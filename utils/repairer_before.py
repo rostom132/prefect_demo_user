@@ -1,3 +1,4 @@
+from prefect import task
 from model.constants import Gender
 
 gender_fuzzy_mapper = {
@@ -31,6 +32,7 @@ email_fuzzy_mapper = {
     ]
 }
 
+@task
 def auto_correct_gender(value: str):
     if value is None:
         return value
@@ -41,6 +43,7 @@ def auto_correct_gender(value: str):
             return gender
     return value
 
+@task
 def auto_correct_mail(value: str):
     if value is None:
         return value
