@@ -24,9 +24,9 @@ def validate_input(input: str):
 
     allUsersData = json.loads(input)
     list_future = validate_userData.map(allUsersData)
-    list_rs = list_future.result()
 
-    for is_success, userData in list_rs:
+    for future_rs in list_future:
+        is_success, userData = future_rs.result()
         if is_success:
             list_correct_data.append(userData)
         else:
