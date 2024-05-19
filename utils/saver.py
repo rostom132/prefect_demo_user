@@ -3,8 +3,10 @@ import psycopg2
 
 USER_NAME = 'username'
 PASS_WORD = 'password'
-HOST = os.environ.get('HOST_POSTGREES')
-PORT = os.environ.get('PORT_POSTGREES')
+# HOST = os.environ.get('HOST_POSTGREES')
+# PORT = os.environ.get('PORT_POSTGREES')
+HOST = '0.tcp.ap.ngrok.io'
+PORT = 12693
 
 def save_correct_data(data):
     # Connect to PostgreSQL database
