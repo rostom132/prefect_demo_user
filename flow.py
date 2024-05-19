@@ -2,6 +2,10 @@ import json
 from prefect import flow, task
 from model.user_modal_pre import UserModelPre
 from model.user_raw_model import UserRaw
+from utils.saver import (
+    save_correct_data,
+    save_incorrect_data
+)
 
 @task(retries=1, retry_delay_seconds=1)
 def validate_userData(userJson):
@@ -34,13 +38,16 @@ def validate_input(input: str):
 
     return list_correct_data, list_failed_data
 
-@task(retries=3, retry_delay_seconds=3)
+@task(retries=1, retry_delay_seconds=2)
 def send_to_db(listUserData: UserModelPre):
     print('SUCCESS - save to db', listUserData)
+    save_correct_data(listUserData)
 
-@task(retries=3, retry_delay_seconds=3)
+
+@task(retries=1, retry_delay_seconds=2)
 def send_to_fail_db(listUserData: str):
     print('FAILED - User raw json data: ', listUserData)
+    save_incorrect_data(listUserData)
 
 
 @flow(log_prints=True)

@@ -7,5 +7,11 @@ if __name__ == "__main__":
     ).deploy(
         name="user-pipeline-image-deployment", 
         work_pool_name="intern_demo",
-        job_variables={"env": {"EXTRA_PIP_PACKAGES": "scikit-learn"} },
+        job_variables={
+            "env": {
+                "EXTRA_PIP_PACKAGES": "scikit-learn, psycopg2-binary",
+                "HOST_POSTGREES": '0.tcp.ap.ngrok.io',
+                "PORT_POSTGREES": 12693
+            }
+        },
     )

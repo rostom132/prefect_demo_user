@@ -1,5 +1,6 @@
 from model.user_modal_pre import UserModelPre
 from model.user_raw_model import UserRaw
+from utils.saver import save_incorrect_data
 
 if __name__ == '__main__':
     # inputData = {
@@ -23,5 +24,6 @@ if __name__ == '__main__':
     print('RAW USER:', input_data)
 
     user = UserModelPre(**input_data)
+    save_incorrect_data([user])
 
     print('FULL USER:', user)
