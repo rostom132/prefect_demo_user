@@ -1,32 +1,22 @@
 import json
 
-from utils.repairer import auto_correct
 from pydantic import (
     BaseModel,
-    model_validator
+    EmailStr
 )
-from collections import defaultdict
 
-class UserModel(BaseModel):
+from model.constants import Gender
+
+class BaseUserModel(BaseModel):
     name: str
     age: int
-    gender: str
-    email: str
+    gender: Gender
+    email: EmailStr
     phoneNumber: str
     address: str
     creditCardId: str
     weight: float
     height: float
-
-    @model_validator(mode='before')
-    @classmethod
-    def check_user_data(cls, data):
-        print('Go to validator: ', data)
-        
-        if isinstance(data, dict):
-            if 'gender' not in data or data['gender'] is None:
-                data.update({'gender': auto_correct('gender', data.get('gender', None), data)})
-        return data
 
     def __str__(self):
         return json.dumps(self.__dict__)

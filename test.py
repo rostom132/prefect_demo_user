@@ -1,5 +1,5 @@
-from utils.repairer import auto_correct
-from model.user_model import UserModel
+from model.user_modal_pre import UserModelPre
+from model.user_raw_model import UserRaw
 
 if __name__ == '__main__':
     # inputData = {
@@ -9,4 +9,19 @@ if __name__ == '__main__':
     # rs = auto_correct('gender', None, inputData)
     # print('Result is ', rs)
 
-    user = UserModel(name='asdasd')
+    input_data = {
+        "name": "Kelly Zuniga",
+        "gender": "weak",
+        "age": 18,
+        "email": "uvazquez@gmail1.com",
+        "phoneNumber": "528.365.9480",
+        "address": "Unit 1851 Box 0909\nDPO AA 70681",
+        "creditCardId": "341053990308816",
+        "height": 50,
+        "weight": 100
+    }
+    print('RAW USER:', input_data)
+
+    user = UserModelPre(**input_data)
+
+    print('FULL USER:', user)

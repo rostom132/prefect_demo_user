@@ -1,21 +1,22 @@
 import json
 from prefect import flow, task
-from model.user_model import UserModel
+from model.user_modal_pre import UserModelPre
 
 @task(retries=2)
 def validate_input(input: str):
+    print('PROCESS - validate user: ', input)
     userJson = json.loads(input)
-    userData = UserModel(**userJson)
+    userData = UserModelPre(**userJson)
     return userData
 
-@task
-def send_to_db(userData: UserModel):
-    print(userData)
+@task(retries=3, retry_delay_seconds=3)
+def send_to_db(userData: UserModelPre):
+    print('SUCCESS - save to db', userData)
 
-@task
+@task(retries=3, retry_delay_seconds=3)
 def send_to_fail_db(userJsonData: str, exception):
-    print('User raw json data: ', userJsonData)
-    print('Exception: ', exception)
+    print('FAILED - User raw json data: ', userJsonData)
+    print('FAILED - Exception: ', exception)
 
 
 @flow(log_prints=True)
