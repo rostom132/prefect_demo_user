@@ -3,7 +3,7 @@ from prefect import flow, task
 from model.user_modal_pre import UserModelPre
 from model.user_raw_model import UserRaw
 
-@task(retries=2, retry_delay_seconds=3)
+@task(retries=1, retry_delay_seconds=1)
 def validate_userData(userJson):
     is_success = False
     try:
@@ -16,14 +16,15 @@ def validate_userData(userJson):
     
     return is_success, userData
 
-@task(retries=2)
+@task
 def validate_input(input: str):
     print('PROCESS - validate user: ', input)
     list_correct_data = []
     list_failed_data = []
 
     allUsersData = json.loads(input)
-    list_rs = validate_userData.map(allUsersData)
+    list_future = validate_userData.map(allUsersData)
+    list_rs = list_future.result()
 
     for is_success, userData in list_rs:
         if is_success:
