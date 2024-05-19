@@ -6,5 +6,6 @@ if __name__ == "__main__":
         entrypoint="flow.py:user_pipeline",
     ).deploy(
         name="user-pipeline-image-deployment", 
-        work_pool_name="intern_demo"
+        work_pool_name="intern_demo",
+        job_variables={"env": {"EXTRA_PIP_PACKAGES": "scikit-learn"} },
     )

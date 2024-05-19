@@ -20,8 +20,9 @@ class UserModel(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def check_user_data(cls, data):
+        print('Go to validator: ', data)
         if isinstance(data, dict):
-            if not data['gender']:
+            if 'gender' not in data or data['gender'] is None:
                 data['gender'] = auto_correct('gender', data['gender'], data)
         return data
 

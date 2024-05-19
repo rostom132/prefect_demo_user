@@ -18,6 +18,7 @@ correcter_mapping = {
 
 @task
 def auto_correct(field: str, value, userData):
+    print('RUN correcter with field: ', field)
     if field in correcter_mapping:
         return correcter_mapping[field](value, userData)
     return None
