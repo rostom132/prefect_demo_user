@@ -46,5 +46,5 @@ def send_to_fail_db(listUserData: str):
 @flow(log_prints=True)
 def user_pipeline(userJsonDatas: str = "[]"):
     list_correct_data,  list_failed_data = validate_input(userJsonDatas)
-    send_to_db(list_correct_data)
-    send_to_fail_db(list_failed_data)
+    send_to_db.submit(list_correct_data)
+    send_to_fail_db.submit(list_failed_data)
