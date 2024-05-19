@@ -5,6 +5,7 @@ from pydantic import (
     BaseModel,
     model_validator
 )
+from collections import defaultdict
 
 class UserModel(BaseModel):
     name: str
@@ -21,6 +22,7 @@ class UserModel(BaseModel):
     @classmethod
     def check_user_data(cls, data):
         print('Go to validator: ', data)
+        data = defaultdict(data)
         if isinstance(data, dict):
             if 'gender' not in data or data['gender'] is None:
                 data['gender'] = auto_correct('gender', data['gender'], data)
