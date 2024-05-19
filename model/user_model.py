@@ -22,8 +22,9 @@ class UserModel(BaseModel):
     @classmethod
     def check_user_data(cls, data):
         print('Go to validator: ', data)
-        data = defaultdict(data)
+        
         if isinstance(data, dict):
+            data = defaultdict(None, data)
             if 'gender' not in data or data['gender'] is None:
                 data['gender'] = auto_correct('gender', data['gender'], data)
         return data
