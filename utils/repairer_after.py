@@ -1,24 +1,15 @@
 from prefect import task
 import pickle
+from model.constants import Gender
 
 # load
 with open('./utils/gender_predictor.pkl', 'rb') as f:
     gender_predictor = pickle.load(f)
 
 @task
-def auto_correct_gender(value, userData):
+def auto_correct_gender(userData):
     print('USERDATA ', userData)
-    predict_rs = gender_predictor.predict([(userData['height'], userData['weight'])])
+    predict_rs = gender_predictor.predict([(float(userData['height']), float(userData['weight']))])
     if len(predict_rs) > 0 and predict_rs[0]:
-        return 'MALE'
-    return 'FEMALE'
-
-correcter_mapping = {
-    'gender': auto_correct_gender
-}
-
-def auto_correct(field: str, value, userData):
-    print('RUN correcter with field: ', field)
-    if field in correcter_mapping:
-        return correcter_mapping[field](value, userData)
-    return None
+        return Gender.male
+    return Gender.female
