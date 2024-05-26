@@ -6,55 +6,80 @@ from utils.db import (
     save_correct_data,
     save_incorrect_data
 )
+from utils.hash import (
+    match_hashed_text
+)
+from model.constants import DataType
 
-@task(retries=1, retry_delay_seconds=1)
+@task
+def integrity_check(userJson):
+    try:
+        hashed = userJson['hashed']
+        text = json.dumps(userJson['data'],default=lambda x: x.dict())
+        if match_hashed_text(hashed, text):
+            return True
+    except Exception as e:
+        print('FAILED to check integrity: ', userJson['data'], e)
+    return False
+
+@task
 def validate_userData(userJson):
     print('RAW USER: ', userJson)
-    is_success = False
+    type_of_data = DataType.corrupted
+    
+    if not integrity_check(userJson):
+        return type_of_data, userJson
+
     try:
-        userData = UserModelPre(**userJson)
-        is_success = True
+        userData = UserModelPre(**userJson['data'])
+        type_of_data = DataType.correct
     except Exception as e:
-        print('FAILED to parse: ', userJson, e)
-        userData = UserRaw(**userJson)
-        is_success = False
+        print('FAILED to parse: ', userJson['data'], e)
+        userData = UserRaw(**userJson['data'])
+        type_of_data = DataType.incorrect
     print('PARSED USER: ', userData)
 
-    return is_success, userData
+    return type_of_data, userData
 
 @task
 def validate_input(input: str):
     print('PROCESS - validate user: ', input)
     list_correct_data = []
-    list_failed_data = []
+    list_incorrect_data = []
+    list_corupted_data = []
 
     allUsersData = json.loads(input)
     list_future = validate_userData.map(allUsersData)
 
     for future_rs in list_future:
-        is_success, userData = future_rs.result()
-        if is_success:
+        type_of_data, userData = future_rs.result()
+        if type_of_data == DataType.correct:
             list_correct_data.append(userData)
-        else:
-            list_failed_data.append(userData)
+        if type_of_data == DataType.incorrect:
+            list_incorrect_data.append(userData)
+        if type_of_data == DataType.corrupted:
+            list_corupted_data.append(userData)
 
-    return list_correct_data, list_failed_data
+    return list_correct_data, list_incorrect_data, list_corupted_data
 
 @task(retries=1, retry_delay_seconds=2)
 def send_to_db(listUserData: UserModelPre):
-    print('SUCCESS - save to db', listUserData)
+    print('CORRECT - save to db', listUserData)
     save_correct_data(listUserData)
-    return None
 
 
 @task(retries=1, retry_delay_seconds=2)
-def send_to_fail_db(listUserData: str):
-    print('FAILED - User raw json data: ', listUserData)
+def send_to_incorrect_db(listUserData: str):
+    print('INCORRECT - User raw json data: ', listUserData)
     save_incorrect_data(listUserData)
-    return None
+
+@task(retries=1, retry_delay_seconds=2)
+def handle_corrupted_data(userJson):
+    print('CORRUPTED DATA - User raw json data: ', userJson)
 
 @flow(log_prints=True)
 def user_pipeline(userJsonDatas: str = "[]"):
-    list_correct_data,  list_failed_data = validate_input(userJsonDatas)
+    list_correct_data, list_incorrect_data, list_corupted_data = validate_input(userJsonDatas)
     send_to_db.submit(list_correct_data)
-    send_to_fail_db.submit(list_failed_data)
+    send_to_incorrect_db.submit(list_incorrect_data)
+    handle_corrupted_data.submit(list_corupted_data)

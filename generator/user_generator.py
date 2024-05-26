@@ -64,9 +64,11 @@ def getWrongGenderOnly():
     data.gender = None
     return data
 
+def getRandomTrueFalse(percentageTrue):
+    return faker.random_int(min=0, max=100) < percentageTrue
 
 def getRandomUserData():
-    if (faker.random_int(min=0, max=100) < 40):
+    if getRandomTrueFalse(40):
         return getWrongUserData()
     return getRightUserData()
 
