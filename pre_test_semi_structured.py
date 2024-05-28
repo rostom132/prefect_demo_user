@@ -3,7 +3,7 @@ from generator.user_generator import (
     getWrongGenderOnly,
     getRandomTrueFalse
 )
-from pre_flow import user_pipeline
+from pre_flow import user_pipeline_semi_structured
 from utils.hash import hash_text
 import json
 
@@ -24,4 +24,4 @@ if __name__ == '__main__':
         })
 
     print('INPUT DATA: ', payload)
-    user_pipeline(json.dumps(payload, default=lambda x: x.dict()))
+    user_pipeline_semi_structured(json.dumps(payload, default=lambda x: x.dict()))

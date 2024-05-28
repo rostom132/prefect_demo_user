@@ -1,4 +1,3 @@
-import json
 from prefect import flow, task
 from model.user_modal_post import UserModelPost
 from model.user_raw_model import UserRaw
@@ -12,12 +11,12 @@ from utils.db import (
 @task
 def get_incorrect_user_data():
     rs = get_incorrect_data()
-    print('RAW DATA:', rs)
+    print('get_incorrect_user_data RAW DATA:', rs)
     return rs
 
 @task(retries=1, retry_delay_seconds=1)
 def validate_userData(userTupple):
-    print('RAW USER: ', userTupple)
+    print('validate_userData RAW USER: ', userTupple)
 
     userJson = {
         'name': userTupple[1],
@@ -44,7 +43,7 @@ def validate_userData(userTupple):
 
 @task
 def validate_input(input):
-    print('PROCESS - validate user: ', input)
+    print('validate_input - validate user: ', input)
     list_correct_data = []
     list_failed_data = []
 
