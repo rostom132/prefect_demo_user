@@ -8,11 +8,18 @@ from utils.db import (
     get_source_data,
     delete_source_data
 )
+from utils.minio_client import (
+    list_source_objects,
+    get_source_object,
+    put_destination_object
+)
 from utils.hash import (
-    match_hashed_text
+    match_hashed_text,
+    calculate_s3_etag
 )
 from model.constants import DataType
 
+## FLOWS STRUCTURED AND SEMI-STRUTURED
 @task
 def load_data_to_json(input: str):
     print('LOAD JSON - user data: ', input)
@@ -131,7 +138,6 @@ def remove_source_data(input):
 def handle_corrupted_data(userJson):
     print('CORRUPTED DATA - User raw json data: ', userJson)
 
-## FLOWS
 @flow(log_prints=True)
 def user_pipeline_semi_structured(userJsonDatas: str = "[]"):
     all_user_data = load_data_to_json(userJsonDatas)
@@ -151,3 +157,40 @@ def user_pipeline_structured():
     send_to_incorrect_db.submit(list_incorrect_data)
     handle_corrupted_data.submit(list_corupted_data)
     remove_source_data(raw_data)
+
+
+## FLOW UNSTRUCTURED
+@task
+def get_from_source():
+    return list_source_objects()
+
+@task
+def get_object(object_name):
+    print('Get Object: ', object_name)
+    return get_source_object(object_name)
+
+@task
+def check_integrity(data, etag):
+    new_etag = calculate_s3_etag(data)
+    print("new_etag: ", new_etag)
+    print("etag", etag)
+    if new_etag == etag:
+        return True
+    return False
+
+@task
+def put_to_destination(data, key):
+    put_destination_object(data, key)
+
+@flow(log_prints=True)
+def user_pipeline_unstructure():
+    object_names = get_from_source()
+    print('Objects: ', object_names)
+    list_future = get_object.map(object_names)
+    for index, future_rs in enumerate(list_future):
+        data, etag = future_rs.result()
+        is_integrity = check_integrity(data, etag)
+        if is_integrity:
+            put_to_destination(data, object_names[index])
+        else:
+            print('ERROR, NOT INTEGRITY', object_names[index])
