@@ -1,7 +1,8 @@
 from generator.user_generator import (
     getListRandomUserData,
     getWrongGenderOnly,
-    getRandomTrueFalse
+    getRandomTrueFalse,
+    getWrongNameOnly
 )
 from pre_flow import user_pipeline_semi_structured
 from utils.hash import hash_text
@@ -12,6 +13,11 @@ if __name__ == '__main__':
     input_data.append(getWrongGenderOnly())
     input_data.append(getWrongGenderOnly())
     input_data.append(getWrongGenderOnly())
+    input_data.append(getWrongNameOnly())
+    input_data.append(getWrongNameOnly())
+    input_data.append(getWrongNameOnly())
+    input_data.append(getWrongNameOnly())
+    input_data.append(getWrongNameOnly())
 
     payload = []
     for userData in input_data:

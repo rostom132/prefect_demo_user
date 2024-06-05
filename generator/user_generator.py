@@ -11,7 +11,7 @@ def getWrongAge():
     return faker.random_int(min= -100, max= -1)
 
 def getWrongGender():
-    return faker.random_element(WRONG_EMAILS)
+    return faker.random_element(WRONG_GENDERS)
 
 def getWrongPhoneNumber():
     return '123a123a'
@@ -62,6 +62,11 @@ def getWrongUserData():
 def getWrongGenderOnly():
     data = getRightUserData()
     data.gender = None
+    return data
+
+def getWrongNameOnly():
+    data = getRightUserData()
+    data.name = None
     return data
 
 def getRandomTrueFalse(percentageTrue):

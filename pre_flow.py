@@ -1,5 +1,6 @@
 import json
 from prefect import flow, task
+from pydantic import ValidationError
 from model.user_modal_pre import UserModelPre
 from model.user_raw_model import UserRaw
 from utils.db import (
@@ -112,16 +113,20 @@ def validate_userData(userJson):
     try:
         userData = UserModelPre(**userJson)
         type_of_data = DataType.correct
-    except Exception as e:
+    except ValidationError as e:
         print('FAILED to parse: ', userJson, e)
         userData = UserRaw(**userJson)
         type_of_data = DataType.incorrect
+    # except Exception as e:
+    #     print('GOT EXCEPTION: ', e)
+    #     userData = UserRaw(**userJson)
+    #     type_of_data = DataType.corrupted
     print('PARSED USER: ', userData)
 
     return type_of_data, userData
 
 @task(retries=1, retry_delay_seconds=2)
-def send_to_db(listUserData: UserModelPre):
+def send_to_correct_db(listUserData: UserModelPre):
     print('CORRECT - save to db', listUserData)
     save_correct_data(listUserData)
 
@@ -143,7 +148,7 @@ def user_pipeline_semi_structured(userJsonDatas: str = "[]"):
     all_user_data = load_data_to_json(userJsonDatas)
     all_user_data, list_corupted_data = all_integrity_check(all_user_data)
     list_correct_data, list_incorrect_data, new_list_corupted_data = validate_input(all_user_data)
-    send_to_db.submit(list_correct_data)
+    send_to_correct_db.submit(list_correct_data)
     send_to_incorrect_db.submit(list_incorrect_data)
     handle_corrupted_data.submit(list_corupted_data + new_list_corupted_data)
 
@@ -153,7 +158,7 @@ def user_pipeline_structured():
     raw_data = load_data_from_db_source()
     all_user_data = convert_source_data(raw_data)
     list_correct_data, list_incorrect_data, list_corupted_data = validate_input(all_user_data)
-    send_to_db.submit(list_correct_data)
+    send_to_correct_db.submit(list_correct_data)
     send_to_incorrect_db.submit(list_incorrect_data)
     handle_corrupted_data.submit(list_corupted_data)
     remove_source_data(raw_data)

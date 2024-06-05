@@ -34,17 +34,22 @@ email_fuzzy_mapper = {
 
 @task
 def auto_correct_gender(value: str):
+    print("auto_correct_gender old value: ", value)
     if value is None:
         return value
 
-    value = value.lower()
+    new_value = value.lower()
     for gender in gender_fuzzy_mapper:
-        if value in gender_fuzzy_mapper[gender]:
-            return gender
+        if new_value in gender_fuzzy_mapper[gender]:
+            value = gender
+            break
+        
+    print("auto_correct_gender new value: ", value)
     return value
 
 @task
 def auto_correct_mail(value: str):
+    print("auto_correct_mail old value: ", value)
     if value is None:
         return value
     
@@ -57,6 +62,8 @@ def auto_correct_mail(value: str):
 
     for email in email_fuzzy_mapper:
         if post_email in email_fuzzy_mapper[email]:
-            return pre_email + '@' +  email
+            value = pre_email + '@' +  email
+            break
     
+    print("auto_correct_mail old value: ", value)
     return value
